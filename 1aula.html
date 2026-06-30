@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escape Room: Evacuazione Scolastica (Horror Edition)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Special+Elite&display=swap');
+
+        :root {
+            --primary: #8a0303; /* Rosso sangue scuro */
+            --primary-glow: #ff0000; /* Rosso vivo per gli allarmi */
+            --secondary: #3a4f22; /* Verde marcio/tossico per la salvezza */
+            --bg-dark: #050505; /* Nero profondo */
+            --bg-card: #120a0a; /* Grigio/rosso scurissimo */
+            --text-light: #c4b5b5; /* Bianco sporco/cenere */
+            --border-color: #4a0000;
+        }
+
+        body {
+            /* Font stile macchina da scrivere inquietante */
+            font-family: 'Special Elite', monospace;
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at center, #1a0f0f 0%, #000000 100%);
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Effetto vignettatura ai bordi dello schermo */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: inset 0 0 100px rgba(0,0,0,0.9);
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: var(--bg-card);
+            border-radius: 4px;
+            padding: 30px;
+            /* Ombra rossa inquietante */
+            box-shadow: 0 0 40px rgba(138, 3, 3, 0.3), inset 0 0 20px rgba(0,0,0,0.8);
+            border: 2px solid var(--border-color);
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            font-family: 'Creepster', cursive;
+            text-align: center;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 2.5em;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-top: 0;
+            text-shadow: 2px 2px 4px #000, 0 0 10px rgba(255, 0, 0, 0.5);
+            animation: flicker 4s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
+            20%, 24%, 55% { opacity: 0.4; text-shadow: none; }
+        }
+
+        .stats-panel {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--secondary);
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            color: #8c9b7a;
+            border: 1px solid #222;
+        }
+
+        .scene-box {
+            background-color: #000;
+            padding: 25px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            line-height: 1.7;
+            font-size: 1.1em;
+            border: 1px solid #333;
+            box-shadow: inset 0 0 15px rgba(255,0,0,0.05);
+            position: relative;
+        }
+
+        .scene-box p {
+            margin: 10px 0;
+        }
+
+        .scene-box::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(255,255,255,0.03) 50%, rgba(0,0,0,0.1) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        .alarm-text {
+            color: var(--primary-glow);
+            font-family: 'Creepster', cursive;
+            font-size: 1.4em;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px var(--primary-glow);
+            display: inline-block;
+            animation: glitch 0.3s linear infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 1px) }
+            40% { transform: translate(-1px, -1px) }
+            60% { transform: translate(2px, 1px) }
+            80% { transform: translate(1px, -1px) }
+            100% { transform: translate(0) }
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-btn {
+            background-color: #0a0a0a;
+            color: var(--text-light);
+            border: 1px solid #333;
+            padding: 18px;
+            font-family: 'Special Elite', monospace;
+            font-size: 1em;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-btn::before {
+            content: "";
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(138, 3, 3, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #1a0505;
+            border-color: var(--primary);
+            color: #fff;
+            transform: scale(1.02);
+            box-shadow: 0 0 10px rgba(138, 3, 3, 0.5);
+        }
+
+        .option-btn:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .option-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: #111;
+        }
+
+        #feedback-panel {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.1em;
+            animation: fadeInBloody 0.8s forwards;
+            border: 2px solid;
+        }
+
+        @keyframes fadeInBloody {
+            from { opacity: 0; transform: scale(0.95); filter: blur(2px); }
+            to { opacity: 1; transform: scale(1); filter: blur(0); }
+        }
+
+        .success { 
+            background-color: rgba(58, 79, 34, 0.8); /* Verde marcio trasparente */
+            color: #e0e0e0; 
+            border-color: var(--secondary); 
+            box-shadow: 0 0 20px rgba(58, 79, 34, 0.5);
+        }
+        
+        .error { 
+            background-color: rgba(138, 3, 3, 0.8); /* Rosso sangue trasparente */
+            color: #fff; 
+            border-color: var(--primary-glow); 
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+        
+        .next-btn {
+            display: none;
+            margin-top: 20px;
+            background-color: var(--bg-dark);
+            color: var(--primary-glow);
+            border: 1px solid var(--primary-glow);
+            padding: 15px 30px;
+            font-family: 'Creepster', cursive;
+            font-size: 1.5em;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            width: 100%;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+
+        .next-btn:hover {
+            background-color: var(--primary);
+            color: #000;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .next-btn.success-btn {
+            color: var(--secondary);
+            border-color: var(--secondary);
+        }
+        
+        .next-btn.success-btn:hover {
+            background-color: var(--secondary);
+            color: #000;
+            box-shadow: 0 0 20px var(--secondary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🏫 Simulazione: Step 1</h1>
+        
+        <div class="stats-panel">
+            <span id="score-display">Punteggio Salvezza: 0 / 100</span>
+            <span>Obiettivo: 80 pt</span>
+            <span>Status: Livello 1 Iniziato</span>
+        </div>
+
+        <div class="scene-box">
+            <p><strong>[SCENA: Aula 3B, Secondo Piano. Ore 10:15]</strong></p>
+            <p>Il professore di matematica sta scrivendo un'equazione alla lavagna. Fuori c'è il sole. Il clima in classe è stranamente troppo tranquillo.</p>
+            <p>All'improvviso, un suono acuto e intermittente squarcia il silenzio: <span class="alarm-text">DRIIIN! DRIIIN! DRIIIN!</span> È il segnale di allarme per l'evacuazione dell'edificio.</p>
+            <p>Il professore si ferma e vi guarda. Il tempo si congela in una "pausa attiva". Il tuo timer per l'azione inizia a scorrere. Devi prendere la tua prima decisione.</p>
+            <p><em>Cosa decidi di fare nei primi secondi?</em></p>
+        </div>
+
+        <div class="options-container" id="options">
+            <button class="option-btn" onclick="checkAnswer('A')">
+                <strong>[A]</strong> Afferro velocemente il mio zaino e il giubbotto. Non posso lasciarli qui, ci metto solo un secondo!
+            </button>
+            <button class="option-btn" onclick="checkAnswer('B')">
+                <strong>[B]</strong> Mi alzo immediatamente lasciando tutto sul banco, mantenendo la calma, e mi inserisco nella fila che si sta formando dietro l'alunno "Aprifila".
+            </button>
+            <button class="option-btn" onclick="checkAnswer('C')">
+                <strong>[C]</strong> Scatto in piedi e corro il più velocemente possibile verso la porta per non rimanere bloccato dentro.
+            </button>
+            <button class="option-btn" onclick="checkAnswer('D')">
+                <strong>[D]</strong> Mi infilo immediatamente sotto il banco e mi copro la testa con le mani, aspettando che il professore mi dica cosa fare.
+            </button>
+        </div>
+
+        <div id="feedback-panel"></div>
+        <button id="next-btn" class="next-btn" onclick="location.reload()">Riprova il Loop Temporale</button>
+    </div>
+
+    <script>
+        let score = 0;
+
+        function checkAnswer(choice) {
+            const feedbackPanel = document.getElementById('feedback-panel');
+            const scoreDisplay = document.getElementById('score-display');
+            const nextBtn = document.getElementById('next-btn');
+            
+            // Disabilita i pulsanti dopo la scelta
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            feedbackPanel.style.display = 'block';
+            nextBtn.style.display = 'block';
+
+            if (choice === 'B') {
+                score += 20;
+                feedbackPanel.className = 'success';
+                feedbackPanel.innerHTML = "✅ SOPRAVVISSUTO... PER ORA.<br>Perfetto. Lasciare il materiale è fondamentale per non creare intralcio e mantenere l'ordine. Ti sei messo in fila in sicurezza. (+20 Punti)";
+                scoreDisplay.innerHTML = `Punteggio Salvezza: ${score} / 100`;
+                nextBtn.className = "next-btn success-btn";
+                nextBtn.innerText = "Prosegui allo Step 2 ➔";
+                nextBtn.onclick = loadStep2;
+            } else {
+                feedbackPanel.className = 'error';
+                nextBtn.className = "next-btn";
+                nextBtn.innerText = "🔄 Innesca Loop Temporale";
+                nextBtn.onclick = function() { location.reload(); };
+                
+                if (choice === 'A') {
+                    feedbackPanel.innerHTML = "❌ ERRORE FATALE!<br>Perdere tempo per prendere zaino e giubbotto ritarda l'evacuazione e gli spallacci rischiano di incastrarsi o far inciampare i compagni nel buio. LOOP TEMPORALE ATTIVATO.";
+                } else if (choice === 'C') {
+                    feedbackPanel.innerHTML = "❌ ERRORE FATALE!<br>Il panico e la corsa sono i nemici principali durante un'evacuazione. Rischieresti di spingere i compagni o cadere, venendo calpestato. LOOP TEMPORALE ATTIVATO.";
+                } else if (choice === 'D') {
+                    feedbackPanel.innerHTML = "❌ ERRORE FATALE!<br>Mettersi sotto i banchi è la procedura in caso di scossa di TERREMOTO, non per l'allarme di evacuazione (spesso causato da un incendio). Rimarrai intrappolato! LOOP TEMPORALE ATTIVATO.";
+                }
+            }
+        }
+
+        function loadStep2() {
+            // Aggiorna Titolo e Statistiche
+            document.querySelector('h1').innerText = "🏫 Simulazione: Step 2";
+            const statusSpans = document.querySelectorAll('.stats-panel span');
+            statusSpans[2].innerText = "Status: Livello 2 Iniziato";
+
+            // Aggiorna la Scena
+            const sceneBox = document.querySelector('.scene-box');
+            sceneBox.innerHTML = `
+                <p><strong>[SCENA: Corridoio Ovest, Secondo Piano. Ore 10:16]</strong></p>
+                <p>Siete usciti dall'aula in fila indiana. Le luci principali si sono spente. L'illuminazione di emergenza proietta ombre distorte sui muri scrostati.</p>
+                <p>Un denso fumo grigio e asfissiante inizia a salire dalle <span class="alarm-text">scale principali</span>, la vostra via d'uscita abituale.</p>
+                <p>Il panico comincia a diffondersi tra i compagni. Senti dei rumori sinistri provenire dal piano di sotto. Il timer scorre inesorabile.</p>
+                <p><em>Qual è la tua prossima mossa?</em></p>
+            `;
+
+            // Aggiorna le Opzioni
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = `
+                <button class="option-btn" onclick="checkAnswerStep2('A')">
+                    <strong>[A]</strong> Mi copro la bocca con la maglia e attraverso il fumo correndo verso le scale principali. È la strada che conosco meglio!
+                </button>
+                <button class="option-btn" onclick="checkAnswerStep2('B')">
+                    <strong>[B]</strong> Ignoro il fumo e corro verso l'ascensore in fondo al corridoio per scendere istantaneamente al piano terra e scappare.
+                </button>
+                <button class="option-btn" onclick="checkAnswerStep2('C')">
+                    <strong>[C]</strong> Rientro immediatamente in classe, chiudo la porta e mi nascondo nell'armadio sperando che i soccorsi arrivino presto.
+                </button>
+                <button class="option-btn" onclick="checkAnswerStep2('D')">
+                    <strong>[D]</strong> Seguo il compagno "Aprifila" verso l'uscita di sicurezza alternativa (scala antincendio), camminando abbassati per evitare i fumi.
+                </button>
+            `;
+
+            // Resetta il Pannello Feedback e il Pulsante
+            const feedbackPanel = document.getElementById('feedback-panel');
+            const nextBtn = document.getElementById('next-btn');
+            feedbackPanel.style.display = 'none';
+            nextBtn.style.display = 'none';
+            
+            // Riporta la visuale in cima alla pagina
+            window.scrollTo(0, 0);
+        }
+
+        function checkAnswerStep2(choice) {
+            const feedbackPanel = document.getElementById('feedback-panel');
+            const scoreDisplay = document.getElementById('score-display');
+            const nextBtn = document.getElementById('next-btn');
+            
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            feedbackPanel.style.display = 'block';
+            nextBtn.style.display = 'block';
+
+            if (choice === 'D') {
+                score += 20;
+                feedbackPanel.className = 'success';
+                feedbackPanel.innerHTML = "✅ SCELTA VITALE!<br>Mai usare ascensori, mai attraversare il fumo e mai tornare indietro in caso di incendio. Usare la via di fuga alternativa mantenendosi bassi è l'unica salvezza. (+20 Punti)";
+                scoreDisplay.innerHTML = `Punteggio Salvezza: ${score} / 100`;
+                nextBtn.className = "next-btn success-btn";
+                nextBtn.innerText = "Vittoria Parziale (Fine Capitolo 1) ➔";
+                nextBtn.onclick = function() { alert("Hai superato i primi due step dell'incubo! Preparati per il Capitolo 2..."); };
+            } else {
+                feedbackPanel.className = 'error';
+                nextBtn.className = "next-btn";
+                nextBtn.innerText = "🔄 Innesca Loop Temporale (Ricomincia)";
+                nextBtn.onclick = function() { location.reload(); };
+                
+                if (choice === 'A') {
+                    feedbackPanel.innerHTML = "❌ ERRORE FATALE!<br>Il fumo tossico è la prima causa di morte negli incendi. Attraversarlo ti farà perdere i sensi in pochi secondi. LOOP TEMPORALE ATTIVATO.";
+                } else if (choice === 'B') {
+                    feedbackPanel.innerHTML = "❌ ERRORE FATALE!<br>In caso di emergenza, l'ascensore diventa una trappola mortale a causa dei blackout o dell'effetto camino che attira il fumo. LOOP TEMPORALE ATTIVATO.";
+                } else if (choice === 'C') {
+                    feedbackPanel.innerHTML = "❌ ERRORE FATALE!<br>Tornare indietro e chiudersi in una stanza senza via di fuga ti intrappola condannandoti. Non ci si nasconde mai durante un'evacuazione. LOOP TEMPORALE ATTIVATO.";
+                }
+            }
+        }
+    </script>
+</body>
+</html>
