@@ -892,7 +892,7 @@
 
     <header>
         <div class="header-title" style="display: flex; align-items: center; gap: 1.5rem;">
-            <a href="3game.html" class="btn-game-link">🎮 Vai alla terza attività</a>
+            <a href="3game.html" id="btn-3game-link" class="btn-game-link" style="display: none;">🎮 Vai a 3game.html</a>
             <h1>⚠️ EVACUAZIONE SOTTO ASSEDIO</h1>
         </div>
         <div class="controls">
@@ -1422,6 +1422,9 @@
             timeRemaining = 180;
             score = 1000;
             
+            const link3game = document.getElementById('btn-3game-link');
+            if (link3game) link3game.style.display = 'none';
+            
             document.getElementById('game-hud').style.display = 'grid';
             document.getElementById('game-instruction-box').style.display = 'flex';
             document.getElementById('siren-overlay').style.display = 'block';
@@ -1763,6 +1766,9 @@
                 playSound('victory');
                 
                 const badge = getSafetyBadge();
+                
+                const link3game = document.getElementById('btn-3game-link');
+                if (link3game) link3game.style.display = 'inline-flex';
                 
                 viewport.innerHTML = `
                     <div class="victory-screen">
