@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il Ritmo della Giornata - Capitolo 1</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==========================================================================
+           4. SPECIFICHE VISIVE E UI/UX (Estetica Dark Game & Glassmorphism)
+           ========================================================================== */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f0f12 0%, #171721 100%);
+            --panel-bg: rgba(30, 30, 38, 0.6);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent-neon: #a855f7;       /* Viola Neon per elementi interattivi */
+            --accent-success: #10b981;    /* Verde Smeraldo */
+            --accent-error: #ef4444;      /* Rosso Cremisi */
+            --font-main: 'Roboto', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Container Principale in Glassmorphism */
+        .game-container {
+            width: 100%;
+            max-width: 700px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--panel-border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Avanzamento della barra (Progressione Additiva) */
+        .progress-wrapper {
+            margin-bottom: 30px;
+        }
+        .progress-bar-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 100px;
+            height: 8px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 15%; /* Stato iniziale onboarding */
+            background: linear-gradient(90deg, var(--accent-neon), #3b82f6);
+            border-radius: 100px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 1. SIGNIFICATO EPICO (Narrazione Immersiva) */
+        .story-section {
+            margin-bottom: 35px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 25px;
+            background: linear-gradient(to right, #ffffff, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        /* Evidenziazione discreta dell'orario nel testo */
+        .time-text {
+            color: #d8b4fe;
+            font-weight: 500;
+        }
+
+        .highlight-box {
+            background: rgba(59, 130, 246, 0.08);
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            border-radius: 0 16px 16px 0;
+            margin: 25px 0;
+        }
+
+        .highlight-box p {
+            color: #93c5fd;
+            margin-bottom: 0;
+            font-size: 1rem;
+        }
+
+        /* Interfaccia Input Enigma (Accessibilità facilitata) */
+        .enigma-section {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .enigma-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .interaction-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .input-field {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 12px;
+            text-align: center;
+            width: 140px;
+            letter-spacing: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-neon);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+        }
+
+        /* Pulsanti e Feedback Cinetico scale(1.05) */
+        .action-btn {
+            background: var(--accent-neon);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 2. SCAFFOLDING DEGLI INDIZI */
+        .scaffolding-box {
+            margin-top: 20px;
+            min-height: 40px;
+        }
+
+        .feedback-msg {
+            font-weight: 500;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback-msg.error { color: var(--accent-error); display: block; }
+        .feedback-msg.success { color: var(--accent-success); display: block; }
+
+        .hint-container {
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px dashed rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+            text-align: left;
+            animation: slideDown 0.3s ease;
+        }
+
+        .hint-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #fca5a5;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Transizioni e Stati di Successo */
+        .hidden {
+            display: none !important;
+        }
+
+        .success-panel {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 25px;
+            text-align: center;
+            animation: scaleUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .success-panel p {
+            color: #a7f3d0;
+            text-align: center;
+        }
+
+        .next-btn {
+            display: inline-block;
+            background: var(--accent-success);
+            color: #064e3b;
+            text-decoration: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-weight: 700;
+            margin-top: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .next-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Animazioni CSS */
+        @keyframes fadeIn {
+            from { opacity: 0; } to { opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scaleUp {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .game-container { padding: 25px 20px; }
+            .interaction-wrapper { flex-direction: column; }
+            .input-field { width: 100%; }
+            .action-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="game-container" id="gameCard">
+        <div class="progress-wrapper">
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+
+        <section class="story-section">
+            <h1>Il tempo sembra essersi fermato.</h1>
+            
+            <p>I gessetti che stridono sulla lavagna. Il ticchettio ritmico dell'orologio a muro. Il brusio leggero dei tuoi compagni di banco e il peso dei libri nello zaino. Guardi l'orologio dell'aula: sono le <span class="time-text">09:15</span> di una mattina come tante altre all'interno della scuola, una di quelle routine così repetitive da sembrare quasi immutabili.</p>
+            <p>Eppure, c'è qualcosa nell'aria oggi. Una strana elettricità.</p>
+            <p>Osserva le pareti dell'aula, i corridoi deserti fuori dalla porta, i volti delle persone intorno a te. Spesso viviamo gli spazi di ogni giorno senza guardarli davvero, muovendoci come automi tra i corridoi e le scale, dando per scontato che tutto resti sempre esattamente dove si trova.</p>
+            
+            <div class="highlight-box">
+                <p>👁️ <strong>Fai attenzione ai dettagli:</strong> Ogni angolo di questo edificio nasconde una geografia invisibile. I cartelli colorati sui muri, le direzioni delle porte, la disposizione dei banchi... tutto ha un senso, anche se ora non ci fai caso.</p>
+            </div>
+            
+            <p>La quotidianità è un equilibrio perfetto, ma basta un solo istante per romperlo. Questione di secondi.</p>
+            <p>Il tuo viaggio comincia qui, nel silenzio di un'aula qualunque. Guardati intorno, memorizza lo spazio e preparati. Qualcosa sta per cambiare il ritmo di questa giornata.</p>
+        </section>
+
+        <section class="enigma-section">
+            <h2>Sblocca il Diario di Bordo</h2>
+            <p style="font-size: 0.95rem; text-align: center;">Per rompere la monotonia ed entrare nella modalità di esplorazione attiva, inserisci la combinazione temporale a 4 cifre che definisce l'istante esatto in cui questa storia ha avuto inizio.</p>
+            
+            <div class="interaction-wrapper">
+                <input type="text" id="lockInput" class="input-field" maxlength="4" placeholder="0000" pattern="[0-9]*" inputmode="numeric" autocomplete="off" aria-label="Inserisci codice a quattro cifre">
+                <button id="submitBtn" class="action-btn">Verifica</button>
+            </div>
+
+            <div class="scaffolding-box">
+                <div id="feedbackMsg" class="feedback-msg"></div>
+                
+                <div id="hintContainer" class="hint-container">
+                    <div id="hintTitle" class="hint-title">Indizio</div>
+                    <p id="hintText" style="font-size: 0.9rem; margin-bottom: 0; color: #fecdd3;"></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="successPanel" class="success-panel hidden">
+            <p><strong>Un click secco rompe il silenzio dell'aula.</strong> Il meccanismo si apre, rivelando le mappe dei corridoi della scuola. L'attenzione ai dettagli ti ha permesso di superare il primo blocco.</p>
+            <a href="./fase2.html" class="next-btn">Procedi nei corridoi →</a>
+        </section>
+    </main>
+
+    <script>
+        /* ==========================================================================
+           5. MOTORE DI STATO DISACCOPPIATO & LOGICA DI SCAFFOLDING
+           ========================================================================== */
+        
+        const gameState = {
+            correctCode: "0915",
+            attempts: 0,
+            isUnlocked: false,
+            // 2. CICLO FAIL-LEARN-SUCCEED
+            hints: [
+                {
+                    type: "Indizio Concettuale",
+                    text: "L'osservazione e l'ancoraggio temporale sono chiavi fondamentali nelle escape room. Da quale momento esatto parte la linea narrativa di questa esperienza?"
+                },
+                {
+                    type: "Indizio Procedurale",
+                    text: "Rileggi con attenzione il primo paragrafo del testo. C'è un'indicazione oraria esatta inserita nella descrizione della routine scolastica."
+                },
+                {
+                    type: "Indizio Risolutivo",
+                    text: "Inserisci l'orario riportato nel primo paragrafo in formato numerico continuativo (senza due punti): '0915'."
+                }
+            ]
+        };
+
+        const lockInput = document.getElementById('lockInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const feedbackMsg = document.getElementById('feedbackMsg');
+        const hintContainer = document.getElementById('hintContainer');
+        const hintTitle = document.getElementById('hintTitle');
+        const hintText = document.getElementById('hintText');
+        const successPanel = document.getElementById('successPanel');
+        const progressBar = document.getElementById('progressBar');
+        const gameCard = document.getElementById('gameCard');
+
+        function verifyAttempt() {
+            const currentGuess = lockInput.value.trim();
+            
+            if (currentGuess === gameState.correctCode) {
+                handleSuccess();
+            } else {
+                handleFailure();
+            }
+        }
+
+        function handleSuccess() {
+            gameState.isUnlocked = true;
+            
+            feedbackMsg.textContent = "Codice Corretto! Accesso Autorizzato.";
+            feedbackMsg.className = "feedback-msg success";
+            hintContainer.style.display = "none";
+            
+            lockInput.disabled = true;
+            submitBtn.disabled = true;
+
+            progressBar.style.width = "40%";
+            
+            successPanel.classList.remove('hidden');
+            successPanel.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function handleFailure() {
+            gameState.attempts++;
+            
+            feedbackMsg.textContent = "Combinazione errata. Il lucchetto non cede.";
+            feedbackMsg.className = "feedback-msg error";
+            
+            gameCard.style.transform = "translateX(-10px)";
+            setTimeout(() => { gameCard.style.transform = "translateX(10px)"; }, 100);
+            setTimeout(() => { gameCard.style.transform = "translateX(0)"; }, 200);
+
+            let hintIndex = Math.min(gameState.attempts - 1, gameState.hints.length - 1);
+            let currentHint = gameState.hints[hintIndex];
+
+            hintTitle.textContent = currentHint.type;
+            hintText.textContent = currentHint.text;
+            hintContainer.style.display = "block";
+
+            lockInput.value = "";
+            lockInput.focus();
+        }
+
+        submitBtn.addEventListener('click', verifyAttempt);
+
+        lockInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                verifyAttempt();
+            }
+        });
+    </script>
+</body>
+</html>
