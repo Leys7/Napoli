@@ -1,0 +1,835 @@
+:Point of Safety - Crisis Simulator:index.html
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point of Safety - Emergency Simulator</title>
+    <!-- Tailwind CSS per il design moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;600;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .tech-font {
+            font-family: 'Share Tech Mono', monospace;
+        }
+        /* Scanner animato per il modulo QR */
+        .scanner-line {
+            animation: scan 2s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+        /* Effetto respirazione per le aree attive */
+        .pulse-border {
+            animation: pulseBorder 2s infinite;
+        }
+        @keyframes pulseBorder {
+            0%, 100% { border-color: rgba(245, 158, 11, 0.4); }
+            50% { border-color: rgba(245, 158, 11, 1); }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-amber-500 selection:text-slate-950">
+
+    <!-- INTRODUZIONE / DASHBOARD HEADER -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-3 h-3 rounded-full bg-red-500 animate-ping"></div>
+                <h1 class="tech-font text-2xl font-bold tracking-wider text-amber-500 flex items-center gap-2 select-none">
+                    <svg class="w-6 h-6 inline text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    POINT OF SAFETY
+                </h1>
+                <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700 uppercase tracking-widest tech-font">v3.0_LIVE</span>
+            </div>
+            
+            <!-- Barra Statistiche in Tempo Reale -->
+            <div class="flex items-center gap-4 tech-font text-sm">
+                <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded flex items-center gap-2">
+                    <span class="text-slate-500 text-xs">PUNTI:</span>
+                    <span id="score-display" class="text-emerald-400 font-bold text-lg">000</span>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded flex items-center gap-2">
+                    <span class="text-slate-500 text-xs">TEMPO:</span>
+                    <span id="timer-display" class="text-amber-400 font-bold text-lg">00:00</span>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded flex items-center gap-2">
+                    <span class="text-slate-500 text-xs">SCUDI:</span>
+                    <div id="lives-display" class="flex gap-1">
+                        <!-- Generati via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- AREA DI GIOCO PRINCIPALE -->
+    <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-8 flex flex-col justify-center">
+        
+        <!-- SCHERMATA 1: SELEZIONE RUOLO E INTRO -->
+        <section id="screen-intro" class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-16 -top-16 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-16 -bottom-16 w-48 h-48 bg-red-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="text-center mb-8">
+                <span class="text-xs font-bold text-amber-500 uppercase tracking-widest tech-font bg-amber-500/10 px-3 py-1 rounded-full">Simulatore di Gestione dell'Emergenza</span>
+                <h2 class="text-3xl sm:text-4xl font-black mt-3 mb-4 text-white tracking-tight">Pronto a prendere il controllo?</h2>
+                <p class="text-slate-400 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
+                    Sulla scia dell'allarme scolastico, sei stato designato per coordinare il tuo gruppo al <strong>Punto di Raccolta</strong>. Gestisci il caos, organizza la logistica ed evita i pericoli strutturali prima dello scadere del tempo.
+                </p>
+            </div>
+
+            <!-- Selezione Ruolo -->
+            <h3 class="tech-font text-slate-300 text-center uppercase tracking-wider mb-4 text-xs font-semibold">Seleziona il tuo Profilo Tattico</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <!-- Logistic Manager -->
+                <button onclick="selectClass('logistic')" id="class-logistic" class="class-card group text-left p-4 bg-slate-950 border-2 border-slate-800 rounded-xl transition-all hover:border-amber-500 focus:outline-none">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-amber-500 font-bold text-xs tech-font">LOGISTICS</span>
+                        <svg class="w-5 h-5 text-slate-600 group-hover:text-amber-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                    </div>
+                    <h4 class="font-bold text-white text-base">Logistic Manager</h4>
+                    <p class="text-xs text-slate-500 mt-1">Trova per primo i punti sicuri della mappa. Abilità: <span class="text-emerald-400 font-semibold">Tempo Bonus (+30s)</span>.</p>
+                </button>
+
+                <!-- Comms Officer -->
+                <button onclick="selectClass('comms')" id="class-comms" class="class-card group text-left p-4 bg-slate-950 border-2 border-slate-800 rounded-xl transition-all hover:border-amber-500 focus:outline-none">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-amber-500 font-bold text-xs tech-font">COMMS SIGNAL</span>
+                        <svg class="w-5 h-5 text-slate-600 group-hover:text-amber-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    </div>
+                    <h4 class="font-bold text-white text-base">Communications Officer</h4>
+                    <p class="text-xs text-slate-500 mt-1">Risolve i blackout di segnale. Abilità: <span class="text-emerald-400 font-semibold">Tuning frequenza assistito</span>.</p>
+                </button>
+
+                <!-- First Responder -->
+                <button onclick="selectClass('medic')" id="class-medic" class="class-card group text-left p-4 bg-slate-950 border-2 border-slate-800 rounded-xl transition-all hover:border-amber-500 focus:outline-none">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-amber-500 font-bold text-xs tech-font">FIRST AID</span>
+                        <svg class="w-5 h-5 text-slate-600 group-hover:text-amber-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                    </div>
+                    <h4 class="font-bold text-white text-base">First Responder</h4>
+                    <p class="text-xs text-slate-500 mt-1">Gestisce incidenti e ansia del gruppo. Abilità: <span class="text-emerald-400 font-semibold">Scudo extra (+1 Shield)</span>.</p>
+                </button>
+            </div>
+
+            <!-- Input Nome e Avvio -->
+            <div class="flex flex-col items-center gap-4">
+                <input type="text" id="player-name" placeholder="Inserisci il tuo nome in codice..." class="max-w-xs w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-center text-white focus:outline-none focus:border-amber-500 transition-all text-sm tech-font uppercase tracking-wider">
+                <button onclick="startGame()" class="w-full max-w-xs bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-4 px-6 rounded-xl transition-all shadow-lg shadow-amber-500/20 active:scale-95 text-center tracking-widest tech-font uppercase">
+                    Avvia Simulazione
+                </button>
+            </div>
+        </section>
+
+        <!-- SCHERMATA DI GIOCO INTERATTIVA -->
+        <section id="screen-game" class="hidden bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-2xl flex flex-col gap-6">
+            
+            <!-- Barra di Progresso Fasi -->
+            <div class="grid grid-cols-4 gap-2 text-center tech-font text-[10px] sm:text-xs">
+                <div id="phase-step-0" class="py-2 border-b-2 border-slate-800 text-slate-500 font-bold">FASE 1: PACKING</div>
+                <div id="phase-step-1" class="py-2 border-b-2 border-slate-800 text-slate-500 font-bold">FASE 2: MAPPA</div>
+                <div id="phase-step-2" class="py-2 border-b-2 border-slate-800 text-slate-500 font-bold">FASE 3: APPELLO</div>
+                <div id="phase-step-3" class="py-2 border-b-2 border-slate-800 text-slate-500 font-bold">FASE 4: EMERGENZA</div>
+            </div>
+
+            <!-- Box Scenario Dinamico -->
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 relative overflow-hidden min-h-[140px] flex flex-col justify-center">
+                <div class="absolute top-0 left-0 w-1 bg-amber-500 h-full"></div>
+                <span class="text-xs text-amber-500 font-bold tracking-widest uppercase mb-1 tech-font" id="stage-role-tag">LOGISTICA</span>
+                <p id="scenario-prompt" class="text-slate-200 text-sm sm:text-base leading-relaxed font-semibold">Caricamento dello scenario...</p>
+            </div>
+
+            <!-- AREA DEI MINI-GIOCHI INTERATTIVI -->
+            <div id="interactive-playground" class="bg-slate-950/40 border border-slate-800 rounded-xl p-4 min-h-[260px] flex flex-col justify-center items-center">
+                
+                <!-- Sotto-Schermata 1: Seleziona Equipaggiamento -->
+                <div id="mini-game-pack" class="hidden w-full">
+                    <h4 class="text-center text-xs text-slate-400 uppercase tracking-widest mb-4">Seleziona solo l'attrezzatura d'emergenza critica da portare via:</h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl mx-auto mb-6" id="pack-grid">
+                        <!-- Popolato dinamicamente da JS -->
+                    </div>
+                    <button onclick="validatePackSelection()" class="w-full max-w-xs mx-auto block py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs tracking-widest tech-font uppercase active:scale-95 transition-all">
+                        Conferma Equipaggiamento
+                    </button>
+                </div>
+
+                <!-- Sotto-Schermata 2: Mappa del Cortile SVG -->
+                <div id="mini-game-map" class="hidden w-full flex flex-col items-center">
+                    <h4 class="text-center text-xs text-slate-400 uppercase tracking-widest mb-3">Clicca sullo stallo sicuro assegnato alla classe (Evita le zone di pericolo rosse!):</h4>
+                    <div class="w-full max-w-md bg-slate-900 p-2 rounded-lg border border-slate-800 relative">
+                        <svg viewBox="0 0 400 200" class="w-full h-auto" id="svg-assembly-map">
+                            <!-- Sfondo Cortile -->
+                            <rect width="400" height="200" fill="#1e293b" rx="8"/>
+                            
+                            <!-- Corsia Mezzi di Soccorso (No stazionamento!) -->
+                            <rect x="0" y="80" width="400" height="40" fill="#dc2626" fill-opacity="0.3" stroke="#ef4444" stroke-dasharray="4" />
+                            <text x="200" y="105" fill="#f87171" font-size="10" text-anchor="middle" class="tech-font tracking-widest">CORSIA MEZZI VVF (DIVIETO DI SOSTA)</text>
+                            
+                            <!-- Stallo A - Zona Pericolo Chimico/Caldaie -->
+                            <g onclick="selectMapStall('stallA')" class="cursor-pointer group">
+                                <rect id="stallA" x="40" y="20" width="80" height="40" fill="#334155" stroke="#475569" stroke-width="2" rx="4" class="transition-colors hover:fill-slate-700"/>
+                                <text x="80" y="44" fill="#94a3b8" font-size="11" text-anchor="middle" class="tech-font">ZONA CALDAIE</text>
+                            </g>
+
+                            <!-- Stallo B - Esatto (Stallo Classi) -->
+                            <g onclick="selectMapStall('stallB')" class="cursor-pointer group">
+                                <rect id="stallB" x="160" y="20" width="80" height="40" fill="#334155" stroke="#475569" stroke-width="2" rx="4" class="transition-colors hover:fill-slate-700"/>
+                                <text x="200" y="44" fill="#94a3b8" font-size="11" text-anchor="middle" class="tech-font">STALLO B-12</text>
+                            </g>
+
+                            <!-- Stallo C - Errato (Vicino all'ingresso pericolante) -->
+                            <g onclick="selectMapStall('stallC')" class="cursor-pointer group">
+                                <rect id="stallC" x="280" y="20" width="80" height="40" fill="#334155" stroke="#475569" stroke-width="2" rx="4" class="transition-colors hover:fill-slate-700"/>
+                                <text x="320" y="44" fill="#94a3b8" font-size="11" text-anchor="middle" class="tech-font">ZONA INGRESSO</text>
+                            </g>
+
+                            <!-- Stallo D - Errato (Sotto la tettoia pericolante) -->
+                            <g onclick="selectMapStall('stallD')" class="cursor-pointer group">
+                                <rect id="stallD" x="160" y="140" width="80" height="40" fill="#334155" stroke="#475569" stroke-width="2" rx="4" class="transition-colors hover:fill-slate-700"/>
+                                <text x="200" y="164" fill="#94a3b8" font-size="11" text-anchor="middle" class="tech-font">SOTTO TETTOIA</text>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Sotto-Schermata 3: Scansione QR Code -->
+                <div id="mini-game-qr" class="hidden w-full flex flex-col items-center">
+                    <h4 class="text-center text-xs text-slate-400 uppercase tracking-widest mb-3">Sincronizza il terminale per scansionare il QR code del punto di raccolta:</h4>
+                    
+                    <div class="relative w-40 h-40 bg-slate-900 border-2 border-slate-700 flex items-center justify-center p-3 rounded-xl overflow-hidden pulse-border">
+                        <!-- Laser dello scanner -->
+                        <div class="absolute w-full h-1 bg-emerald-500/85 shadow-lg shadow-emerald-500 scanner-line left-0"></div>
+                        
+                        <!-- Simbolo QR SVG -->
+                        <svg class="w-full h-full text-slate-300" viewBox="0 0 100 100" fill="currentColor">
+                            <rect x="10" y="10" width="20" height="20"/>
+                            <rect x="15" y="15" width="10" height="10" fill="#1e293b"/>
+                            <rect x="70" y="10" width="20" height="20"/>
+                            <rect x="75" y="15" width="10" height="10" fill="#1e293b"/>
+                            <rect x="10" y="70" width="20" height="20"/>
+                            <rect x="15" y="75" width="10" height="10" fill="#1e293b"/>
+                            <rect x="40" y="40" width="20" height="20"/>
+                            <rect x="40" y="20" width="10" height="10"/>
+                            <rect x="50" y="10" width="10" height="10"/>
+                            <rect x="70" y="40" width="10" height="10"/>
+                            <rect x="80" y="50" width="10" height="10"/>
+                            <rect x="10" y="40" width="10" height="10"/>
+                            <rect x="20" y="50" width="10" height="10"/>
+                        </svg>
+                    </div>
+                    
+                    <button onclick="simulateQRScan()" class="mt-4 px-6 py-3 bg-emerald-500 text-slate-950 font-bold rounded-xl hover:bg-emerald-600 transition-all tech-font uppercase text-xs tracking-widest active:scale-95">
+                        Inquadra e Scansiona QR
+                    </button>
+                </div>
+
+                <!-- Sotto-Schermata 4: Tuning Radio d'Emergenza -->
+                <div id="mini-game-radio" class="hidden w-full flex flex-col items-center">
+                    <h4 class="text-center text-xs text-slate-400 uppercase tracking-widest mb-3">Allinea la ricetrasmittente analogica sul Canale Nazionale dei Soccorsi:</h4>
+                    <div class="w-full max-w-sm bg-slate-900 p-5 rounded-xl border border-slate-800 text-center">
+                        <div class="tech-font text-2xl font-bold tracking-wider mb-2 text-amber-500" id="freq-readout">88.5 MHz</div>
+                        <input type="range" id="freq-slider" min="880" max="1080" value="920" oninput="updateFrequency(this.value)" class="w-full accent-amber-500 mb-4 bg-slate-800 rounded-lg appearance-none h-2 cursor-pointer">
+                        <div class="flex justify-between text-[10px] text-slate-500 tech-font">
+                            <span>88.0 MHz</span>
+                            <span class="text-amber-500 font-bold">FREQUENZA TARGET: <span id="target-freq-label">104.2</span> MHz</span>
+                            <span>108.0 MHz</span>
+                        </div>
+                        <button onclick="submitFrequency()" class="mt-5 w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg text-xs tracking-widest tech-font uppercase transition-all">
+                            Sintonizza Frequenza
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Opzioni a Scelta Multipla Standard (Mantenendo i tuoi scenari chiave) -->
+                <div id="options-choices" class="hidden w-full flex flex-col gap-2 max-w-xl mx-auto">
+                    <!-- Bottoni iniettati via JS -->
+                </div>
+
+            </div>
+
+            <!-- Box di Feedback delle Scelte -->
+            <div id="action-feedback" class="hidden p-4 rounded-xl border text-center font-semibold text-sm transition-all duration-300">
+                Feedback dell'azione...
+            </div>
+        </section>
+
+        <!-- SCHERMATA FINALE: REPORT E CERTIFICATO -->
+        <section id="screen-end" class="hidden bg-slate-900/60 border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="text-center mb-6">
+                <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest tech-font bg-emerald-500/10 px-3 py-1 rounded-full">Debriefing di Crisi Concluso</span>
+                <h2 class="text-3xl font-black mt-3 text-white">Rapporto Finale d'Emergenza</h2>
+            </div>
+
+            <!-- Certificato di Competenza -->
+            <div class="bg-slate-950 border-2 border-dashed border-slate-800 rounded-2xl p-6 text-center max-w-lg mx-auto mb-8 relative">
+                <div class="absolute top-2 right-2 text-6xl opacity-5 select-none font-bold tech-font text-white">SAFETY</div>
+                
+                <h3 class="text-lg font-bold text-amber-500 uppercase tracking-wider mb-4 tech-font" id="cert-title">Eroe della Sicurezza</h3>
+                
+                <div class="space-y-3 mb-6">
+                    <p class="text-xs text-slate-400">Si attesta che l'operatore d'istituto:</p>
+                    <p class="text-2xl font-black text-white uppercase tracking-wider border-b border-slate-800 pb-2 max-w-xs mx-auto" id="cert-name">NOME UTENTE</p>
+                    <p class="text-xs text-slate-400">ha completato la simulazione di gestione del punto di raccolta in qualità di:</p>
+                    <p class="text-sm font-bold text-emerald-400 uppercase tracking-wider" id="cert-role">LOGISTIC MANAGER</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 border-t border-slate-800 pt-4 tech-font text-sm">
+                    <div>
+                        <span class="text-[10px] text-slate-500 block uppercase">Punteggio di Crisi</span>
+                        <span class="text-xl font-bold text-white" id="cert-score">100 / 100</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 block uppercase">Tempo Impiegato</span>
+                        <span class="text-xl font-bold text-white" id="cert-time">45s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pulsanti di Azione -->
+            <div class="max-w-xs mx-auto flex flex-col gap-2">
+                <button onclick="restartGame()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3 px-6 rounded-xl transition-all shadow-lg active:scale-95 text-center tracking-widest tech-font uppercase">
+                    Ricomincia Missione
+                </button>
+                <button onclick="window.print()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold py-2.5 px-6 rounded-xl transition-all text-xs tracking-widest tech-font uppercase">
+                    Salva Certificato (PDF / Stampa)
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER DI SISTEMA -->
+    <footer class="border-t border-slate-800 bg-slate-900/40 py-4 text-center text-[10px] text-slate-500 tech-font">
+        <span>© 2026 PROCEDURE PUNTO DI RACCOLTA - PROTOCOLLO DI EVACUAZIONE SCOLASTICA</span>
+    </footer>
+
+    <!-- CODICE JAVASCRIPT PRINCIPALE -->
+    <script>
+        // --- SINTETIZZATORE AUDIO PROCEDURALE (Web Audio API) ---
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    gain.gain.setValueAtTime(0.04, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(140, now);
+                    osc.frequency.linearRampToValueAtTime(70, now + 0.3);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'alarm') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.linearRampToValueAtTime(400, now + 0.4);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                }
+            } catch (e) {
+                console.log("AudioContext non abilitato o bloccato dalle impostazioni del browser.");
+            }
+        }
+
+        // --- STATO E CONFIGURAZIONE DI GIOCO ---
+        let playerName = "Operatore Cadetto";
+        let playerClass = "logistic";
+        let score = 0;
+        let timer = 0;
+        let lives = 3;
+        let timerInterval = null;
+        let currentPhase = 0;
+
+        // Equipaggiamento per la Fase 1 (Cosa portare?)
+        const emergencyGear = [
+            { id: "reg", name: "Registro di Classe", correct: true, icon: "📋" },
+            { id: "pen", name: "Penna d'Emergenza", correct: true, icon: "🖊️" },
+            { id: "phn", name: "Smartphone Carico", correct: true, icon: "📱" },
+            { id: "med", name: "Cassetta Medikit", correct: true, icon: "🩹" },
+            { id: "bag", name: "Zaino Pesante", correct: false, icon: "🎒" },
+            { id: "swt", name: "Nintendo Switch", correct: false, icon: "🎮" },
+            { id: "key", name: "Chiavi della Classe", correct: true, icon: "🔑" },
+            { id: "bot", name: "Bottiglietta d'Acqua", correct: true, icon: "🥤" }
+        ];
+
+        // --- SCENARI AGGIUNTIVI (A scelta multipla integrati con i tuoi originali) ---
+        const textScenarios = {
+            afterMap: {
+                text: "Il flusso di studenti della scuola al punto di raccolta è caotico e confuso. Tutti gridano e cercano notizie. Qual è la tua prima mossa organizzativa nel tuo stallo?",
+                options: [
+                    { text: "Lascio che i ragazzi si rilassino liberamente e si sparpaglino fuori dall'area.", score: -10, fb: "Sbagliato! Perdi il controllo del gruppo e i soccorsi non troveranno i presenti." },
+                    { text: "Uso un tono fermo e autoritario per ordinare silenzio assoluto e compattare la classe per l'appello.", score: 20, fb: "Ottimo! Il silenzio è vitale per udire indicazioni dai megafoni o allarmi secondari." },
+                    { text: "Abbandono il gruppo e corro verso la presidenza a chiedere nuove indicazioni.", score: -5, fb: "No! Un leader non abbandona mai la propria classe presidiata." }
+                ]
+            },
+            afterQR: {
+                text: "Durante l'appello ti accorgi che mancano all'appello Marco e Chiara. Alcuni compagni sussurrano che erano andati in bagno subito prima del suono della campanella. Come gestisci la situazione?",
+                options: [
+                    { text: "Corro immediatamente all'interno della scuola nei bagni a cercarli.", score: -15, fb: "GRAVISSIMO ERRORE! Non devi MAI rientrare nell'edificio durante un allarme attivo." },
+                    { text: "Segno i ragazzi come 'presenti' sul modulo per evitare inutili preoccupazioni o sanzioni.", score: -30, fb: "Irresponsabile! Se sono intrappolati, i soccorritori non li cercheranno mai." },
+                    { text: "Segno Marco e Chiara come DISPERSI sull'appello, indicando l'ultima posizione nota (bagni), e riferisco subito l'informazione al Coordinatore Generale.", score: 30, fb: "Corretto! Questo permette ai Vigili del Fuoco di indirizzare le squadre di ricerca in modo mirato." }
+                ]
+            },
+            afterRadio: {
+                text: "I Vigili del Fuoco hanno preso il controllo dell'istituto. Un tuo compagno insiste per rientrare di nascosto nell'atrio per recuperare le chiavi di casa e la bici. Come intervieni?",
+                options: [
+                    { text: "Lo accompagno tenendogli la porta aperta per sbrigarci prima.", score: -20, fb: "No! C'è il pericolo di fumi tossici, fiamme improvvise o crolli strutturali latenti." },
+                    { text: "Gli ordino di rimanere rigorosamente nello stallo fino al 'Cessato Allarme' ufficiale dei Vigili del Fuoco.", score: 20, fb: "Perfetto! La sicurezza personale e la vita umana valgono molto più di qualsiasi oggetto materiale." }
+                ]
+            }
+        };
+
+        // Selezione predefinita all'avvio
+        selectClass('logistic');
+
+        function selectClass(className) {
+            playSound('click');
+            playerClass = className;
+            document.querySelectorAll('.class-card').forEach(card => {
+                card.classList.remove('border-amber-500', 'bg-slate-900/80');
+                card.classList.add('border-slate-800', 'bg-slate-950');
+            });
+            const selected = document.getElementById(`class-${className}`);
+            if (selected) {
+                selected.classList.remove('border-slate-800', 'bg-slate-950');
+                selected.classList.add('border-amber-500', 'bg-slate-900/80');
+            }
+        }
+
+        function updateLivesUI() {
+            const display = document.getElementById('lives-display');
+            display.innerHTML = "";
+            for (let i = 0; i < (playerClass === 'medic' ? 4 : 3); i++) {
+                const shield = document.createElement('span');
+                shield.innerText = i < lives ? "⚡" : "❌";
+                shield.className = i < lives ? "text-amber-500 text-sm sm:text-base" : "text-slate-700 text-xs sm:text-sm";
+                display.appendChild(shield);
+            }
+        }
+
+        // --- AVVIA SIMULATORE ---
+        function startGame() {
+            initAudio();
+            playSound('success');
+            
+            const nameInput = document.getElementById('player-name').value.trim();
+            if (nameInput) {
+                playerName = nameInput;
+            }
+
+            // Inizializza statistiche in base alla classe
+            lives = playerClass === 'medic' ? 4 : 3;
+            timer = playerClass === 'logistic' ? -30 : 0; // Il logista ha 30 secondi in più di abilità passiva (tempo iniziale negativo)
+
+            document.getElementById('screen-intro').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+            document.getElementById('score-display').innerText = String(score).padStart(3, '0');
+            updateLivesUI();
+
+            // Avvio del Loop del Timer
+            timerInterval = setInterval(() => {
+                timer++;
+                const displayTime = Math.max(0, timer);
+                const mins = String(Math.floor(displayTime / 60)).padStart(2, '0');
+                const secs = String(displayTime % 60).padStart(2, '0');
+                document.getElementById('timer-display').innerText = `${mins}:${secs}`;
+            }, 1000);
+
+            loadPhase(0);
+        }
+
+        // --- SELEZIONE/CARICAMENTO DELLE FASI ---
+        function loadPhase(phase) {
+            currentPhase = phase;
+            playSound('alarm');
+            
+            // Aggiorna indicatori in alto
+            for (let i = 0; i < 4; i++) {
+                const el = document.getElementById(`phase-step-${i}`);
+                if (i === phase) {
+                    el.classList.add('border-amber-500', 'text-amber-500');
+                    el.classList.remove('border-slate-800', 'text-slate-500');
+                } else if (i < phase) {
+                    el.classList.add('border-emerald-500', 'text-emerald-500');
+                    el.classList.remove('border-amber-500', 'text-slate-500');
+                } else {
+                    el.classList.add('border-slate-800', 'text-slate-500');
+                    el.classList.remove('border-amber-500', 'border-emerald-500', 'text-emerald-500', 'text-amber-500');
+                }
+            }
+
+            // Ripristina la visibilità dei componenti interattivi
+            document.getElementById('mini-game-pack').classList.add('hidden');
+            document.getElementById('mini-game-map').classList.add('hidden');
+            document.getElementById('mini-game-qr').classList.add('hidden');
+            document.getElementById('mini-game-radio').classList.add('hidden');
+            document.getElementById('options-choices').classList.add('hidden');
+            document.getElementById('action-feedback').classList.add('hidden');
+
+            const prompt = document.getElementById('scenario-prompt');
+            const roleTag = document.getElementById('stage-role-tag');
+
+            if (phase === 0) {
+                roleTag.innerText = "FASE 1: PREPARAZIONE (LOGISTICA)";
+                prompt.innerText = `Attenzione ${playerName}, l'allarme sta suonando ripetutamente. Prima di far evacuare la classe verso le scale d'emergenza, devi raccogliere l'equipaggiamento d'emergenza indispensabile. Seleziona SOLO gli elementi corretti da portare via.`;
+                document.getElementById('mini-game-pack').classList.remove('hidden');
+                setupPackGame();
+
+            } else if (phase === 1) {
+                roleTag.innerText = "FASE 2: MAPPA DEL CORTILE (LOGISTICA)";
+                prompt.innerText = "La classe è defluita correttamente lungo le scale ed è giunta nel cortile esterno adibito a punto di raccolta d'istituto. Dove posizioni i tuoi compagni di classe per non bloccare le vie di emergenza e i soccorsi?";
+                document.getElementById('mini-game-map').classList.remove('hidden');
+                resetMapUI();
+
+            } else if (phase === 2) {
+                roleTag.innerText = "FASE 3: APPELLO DIGITALE (COMUNICAZIONI)";
+                prompt.innerText = "Tutti i ragazzi si sono allineati correttamente nello stallo. Devi completare immediatamente il report d'appello digitale scansionando il QR-Code presente sul cartello dello stallo per inviare i dati in segreteria.";
+                document.getElementById('mini-game-qr').classList.remove('hidden');
+
+            } else if (phase === 3) {
+                roleTag.innerText = "FASE 4: BLACKOUT DI RETE (COMUNICAZIONI)";
+                const targetFreq = playerClass === 'comms' ? "104.2 (Suggerita)" : "104.2";
+                document.getElementById('target-freq-label').innerText = targetFreq;
+                prompt.innerText = "⚡ EMERGENZA DI RETE: La rete cellulare è andata offline! Non puoi inviare l'appello digitale in cloud. Sintonizza manualmente la frequenza della ricetrasmittente analogica portatile sulla linea radio di soccorso dei Vigili del Fuoco per inoltrare i dati a voce.";
+                document.getElementById('mini-game-radio').classList.remove('hidden');
+            }
+        }
+
+        // --- FASE 1: PACKING GAME ---
+        let selectedPackItems = [];
+        function setupPackGame() {
+            const grid = document.getElementById('pack-grid');
+            grid.innerHTML = "";
+            selectedPackItems = [];
+
+            emergencyGear.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = "p-3 bg-slate-900 border border-slate-800 rounded-lg text-center transition-all hover:bg-slate-800 flex flex-col items-center gap-1.5 focus:outline-none";
+                btn.innerHTML = `
+                    <span class="text-2xl">${item.icon}</span>
+                    <span class="text-xs font-semibold block text-slate-300">${item.name}</span>
+                `;
+                btn.onclick = () => togglePackItem(btn, item.id);
+                grid.appendChild(btn);
+            });
+        }
+
+        function togglePackItem(element, itemId) {
+            playSound('click');
+            const idx = selectedPackItems.indexOf(itemId);
+            if (idx > -1) {
+                selectedPackItems.splice(idx, 1);
+                element.classList.remove('border-amber-500', 'bg-slate-900/60');
+                element.classList.add('border-slate-800', 'bg-slate-900');
+            } else {
+                selectedPackItems.push(itemId);
+                element.classList.remove('border-slate-800', 'bg-slate-900');
+                element.classList.add('border-amber-500', 'bg-slate-900/60');
+            }
+        }
+
+        function validatePackSelection() {
+            let errors = 0;
+            let criticalFound = 0;
+
+            emergencyGear.forEach(item => {
+                const isSelected = selectedPackItems.includes(item.id);
+                if (item.correct && isSelected) {
+                    criticalFound++;
+                } else if (!item.correct && isSelected) {
+                    errors++; // Ha preso zaini pesanti o console perdendo tempo
+                } else if (item.correct && !isSelected && item.id !== "med") {
+                    errors++; // Ha lasciato a terra registri o smartphone
+                }
+            });
+
+            const feedback = document.getElementById('action-feedback');
+            feedback.classList.remove('hidden');
+
+            if (errors === 0 && criticalFound >= 3) {
+                score += 25;
+                document.getElementById('score-display').innerText = String(score).padStart(3, '0');
+                feedback.className = "p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/20 text-emerald-400 font-semibold text-sm text-center";
+                feedback.innerText = "COMPLIMENTI! Hai selezionato l'equipaggiamento ideale. Evacuazione della classe avviata senza inutili pesi o intoppi!";
+                playSound('success');
+                setTimeout(() => loadPhase(1), 3000);
+            } else {
+                lives--;
+                updateLivesUI();
+                feedback.className = "p-4 rounded-xl border border-red-500/30 bg-red-950/20 text-red-400 font-semibold text-sm text-center";
+                feedback.innerText = "ATTENZIONE! Selezione errata. Hai preso oggetti superflui o dimenticato documenti d'appello vitali. (-1 Scudo)";
+                playSound('error');
+                if (lives <= 0) {
+                    endGame();
+                } else {
+                    setTimeout(() => loadPhase(1), 4050);
+                }
+            }
+        }
+
+        // --- FASE 2: MAPPA DEL CORTILE (SVG) ---
+        function resetMapUI() {
+            document.querySelectorAll('#svg-assembly-map rect').forEach(r => {
+                if (r.id) {
+                    r.setAttribute('fill', '#334155');
+                    r.setAttribute('stroke', '#475569');
+                }
+            });
+        }
+
+        function selectMapStall(stallId) {
+            playSound('click');
+            resetMapUI();
+            const rect = document.getElementById(stallId);
+            const feedback = document.getElementById('action-feedback');
+            feedback.classList.remove('hidden');
+
+            if (stallId === 'stallB') {
+                rect.setAttribute('fill', '#059669');
+                rect.setAttribute('stroke', '#34d399');
+                score += 25;
+                document.getElementById('score-display').innerText = String(score).padStart(3, '0');
+                
+                feedback.className = "p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/20 text-emerald-400 font-semibold text-sm text-center";
+                feedback.innerText = "CORRETTO! Lo Stallo B-12 è in zona aperta, sicuro e lontano da ostacoli o crolli accidentali.";
+                playSound('success');
+                setTimeout(() => loadScenarioScreen('afterMap'), 3000);
+            } else {
+                rect.setAttribute('fill', '#dc2626');
+                rect.setAttribute('stroke', '#f87171');
+                lives--;
+                updateLivesUI();
+                
+                feedback.className = "p-4 rounded-xl border border-red-500/30 bg-red-950/20 text-red-400 font-semibold text-sm text-center";
+                if (stallId === 'stallA') {
+                    feedback.innerText = "PERICOLO! La zona caldaie è a rischio esplosione o emissione gas. Stallo non idoneo. (-1 Scudo)";
+                } else if (stallId === 'stallC') {
+                    feedback.innerText = "PERICOLO! Sostare vicino all'ingresso espone il gruppo a crolli di facciata ed ostruisce i soccorsi. (-1 Scudo)";
+                } else if (stallId === 'stallD') {
+                    feedback.innerText = "PERICOLO! Tettoie e pensiline esterne possono cedere a seguito di forti vibrazioni sismiche. (-1 Scudo)";
+                }
+                playSound('error');
+                if (lives <= 0) {
+                    endGame();
+                } else {
+                    setTimeout(() => loadScenarioScreen('afterMap'), 4050);
+                }
+            }
+        }
+
+        // --- INTEGRAZIONE DELLE SCELTE MULTIPLE MULTISTADIO ---
+        function loadScenarioScreen(key) {
+            document.getElementById('mini-game-pack').classList.add('hidden');
+            document.getElementById('mini-game-map').classList.add('hidden');
+            document.getElementById('mini-game-qr').classList.add('hidden');
+            document.getElementById('mini-game-radio').classList.add('hidden');
+            document.getElementById('action-feedback').classList.add('hidden');
+
+            const data = textScenarios[key];
+            const prompt = document.getElementById('scenario-prompt');
+            const container = document.getElementById('options-choices');
+            
+            prompt.innerText = data.text;
+            container.innerHTML = "";
+            container.classList.remove('hidden');
+
+            data.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3.5 bg-slate-900 border border-slate-800 rounded-xl transition-all hover:bg-slate-800 text-sm font-semibold hover:border-slate-600 focus:outline-none";
+                btn.innerText = opt.text;
+                btn.onclick = () => selectScenarioOption(opt, key);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectScenarioOption(opt, key) {
+            playSound('click');
+            score += opt.score;
+            document.getElementById('score-display').innerText = String(score).padStart(3, '0');
+
+            const container = document.getElementById('options-choices');
+            container.classList.add('hidden');
+
+            const feedback = document.getElementById('action-feedback');
+            feedback.classList.remove('hidden');
+
+            if (opt.score > 0) {
+                feedback.className = "p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/20 text-emerald-400 font-semibold text-sm text-center";
+                feedback.innerText = opt.fb;
+                playSound('success');
+            } else {
+                lives--;
+                updateLivesUI();
+                feedback.className = "p-4 rounded-xl border border-red-500/30 bg-red-950/20 text-red-400 font-semibold text-sm text-center";
+                feedback.innerText = opt.fb + " (-1 Scudo)";
+                playSound('error');
+            }
+
+            setTimeout(() => {
+                if (lives <= 0) {
+                    endGame();
+                } else {
+                    if (key === 'afterMap') loadPhase(2);
+                    else if (key === 'afterQR') loadPhase(3);
+                    else if (key === 'afterRadio') endGame();
+                }
+            }, 3050);
+        }
+
+        // --- FASE 3: SCANSIONE QR CODE ---
+        function simulateQRScan() {
+            playSound('click');
+            const feedback = document.getElementById('action-feedback');
+            feedback.classList.remove('hidden');
+            
+            score += 25;
+            document.getElementById('score-display').innerText = String(score).padStart(3, '0');
+            
+            feedback.className = "p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/20 text-emerald-400 font-semibold text-sm text-center";
+            feedback.innerText = "CONNESSIONE DI RETE STABILITA! Appello trasmesso con successo alla centrale d'istituto.";
+            playSound('success');
+            
+            setTimeout(() => loadScenarioScreen('afterQR'), 3000);
+        }
+
+        // --- FASE 4: RADIO TUNING EMULATOR ---
+        let selectedFreq = 92.0;
+        const targetFreq = 104.2;
+
+        function updateFrequency(value) {
+            selectedFreq = (value / 10).toFixed(1);
+            document.getElementById('freq-readout').innerText = `${selectedFreq} MHz`;
+            
+            // Suono a impulsi per simulare la vicinanza alla frequenza corretta
+            const delta = Math.abs(selectedFreq - targetFreq);
+            if (delta < 1.5) {
+                playSound('click');
+            }
+        }
+
+        function submitFrequency() {
+            const delta = Math.abs(selectedFreq - targetFreq);
+            const feedback = document.getElementById('action-feedback');
+            feedback.classList.remove('hidden');
+
+            if (delta < 0.4) {
+                score += 25;
+                document.getElementById('score-display').innerText = String(score).padStart(3, '0');
+                
+                feedback.className = "p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/20 text-emerald-400 font-semibold text-sm text-center";
+                feedback.innerText = "FREQUENZA AGGANCIATA! Comunicazione d'emergenza inoltrata correttamente ai Vigili del Fuoco.";
+                playSound('success');
+                setTimeout(() => loadScenarioScreen('afterRadio'), 3000);
+            } else {
+                lives--;
+                updateLivesUI();
+                feedback.className = "p-4 rounded-xl border border-red-500/30 bg-red-950/20 text-red-400 font-semibold text-sm text-center";
+                feedback.innerText = "STATO: Segnale debole o assente. Regola lo slider per avvicinarti a 104.2 MHz prima di confermare! (-1 Scudo)";
+                playSound('error');
+                if (lives <= 0) {
+                    endGame();
+                }
+            }
+        }
+
+        // --- REPORT DI FINE GIOCO E CERTIFICATO ---
+        function endGame() {
+            clearInterval(timerInterval);
+            playSound('alarm');
+
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-end').classList.remove('hidden');
+
+            const certTitle = document.getElementById('cert-title');
+            const certRole = document.getElementById('cert-role');
+            const certScore = document.getElementById('cert-score');
+            const certTime = document.getElementById('cert-time');
+            const certName = document.getElementById('cert-name');
+
+            certName.innerText = playerName;
+            certScore.innerText = `${score} / 100`;
+            certTime.innerText = `${Math.max(0, timer)}s`;
+
+            const labels = {
+                logistic: "LOGISTIC MANAGER - COORDINATORE DI STALLO",
+                comms: "COMMUNICATIONS OFFICER - SEGRETARIO D'EMERGENZA",
+                medic: "FIRST RESPONDER - COORDINATORE MEDICO E SUPPORTO"
+            };
+            certRole.innerText = labels[playerClass] || "OPERATORE SICUREZZA SCOLASTICA";
+
+            if (lives <= 0) {
+                certTitle.innerText = "🔴 ADDESTRAMENTO COMPROMESSO (A RISCHIO)";
+                certTitle.className = "text-sm sm:text-base font-bold text-red-500 uppercase tracking-wider mb-4 tech-font";
+            } else if (score >= 90) {
+                certTitle.innerText = "🏆 CRISIS COMMANDER ECCELLENTE";
+                certTitle.className = "text-sm sm:text-base font-bold text-emerald-400 uppercase tracking-wider mb-4 tech-font";
+            } else if (score >= 60) {
+                certTitle.innerText = "🟡 RESPONSABILE SICUREZZA IDONEO";
+                certTitle.className = "text-sm sm:text-base font-bold text-amber-500 uppercase tracking-wider mb-4 tech-font";
+            } else {
+                certTitle.innerText = "🟠 OPERATORE BASE (PROVA DA RIPETERE)";
+                certTitle.className = "text-sm sm:text-base font-bold text-orange-400 uppercase tracking-wider mb-4 tech-font";
+            }
+        }
+
+        // --- RIAVVIO DEL SIMULATORE ---
+        function restartGame() {
+            score = 0;
+            timer = 0;
+            lives = 3;
+            document.getElementById('screen-end').classList.add('hidden');
+            document.getElementById('screen-intro').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
+
+
+### Come implementare questa risorsa con i tuoi alunni:
+* **Fai copiare e incollare il codice** in un semplice file di testo, rinominandolo in `index.html` (o usa la funzione di download del browser dal pannello di anteprima).
+* **Organizza una sfida a tempo:** Chi riesce a raggiungere il punteggio di *100/100* con il minor tempo rimasto ottiene il certificato d'oro della sicurezza.
+* **Usa il debriefing:** Usa gli errori commessi nel simulatore (come provare ad andare a recuperare lo zaino o posizionarsi vicino alle caldaie) per innescare un dibattito attivo in aula sulle regole del piano d'evacuazione reale della vostra scuola.
