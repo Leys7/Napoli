@@ -381,8 +381,13 @@
                 feedbackPanel.innerHTML = "✅ SCELTA VITALE!<br>Mai usare ascensori, mai attraversare il fumo e mai tornare indietro in caso di incendio. Usare la via di fuga alternativa mantenendosi bassi è l'unica salvezza. (+20 Punti)";
                 scoreDisplay.innerHTML = `Punteggio Salvezza: ${score} / 100`;
                 nextBtn.className = "next-btn success-btn";
-                nextBtn.innerText = "Vittoria Parziale (Fine Capitolo 1) ➔";
-                nextBtn.onclick = function() { alert("Hai superato i primi due step dell'incubo! Preparati per il Capitolo 2..."); };
+                
+                // Aggiornato per mandare a una nuova pagina HTML invece che fare l'alert
+                nextBtn.innerText = "Vai allo Step 3 ➔";
+                nextBtn.onclick = function() { 
+                    // Puoi cambiare 'step3.html' col vero nome del file successivo!
+                    window.location.href = "step3.html"; 
+                };
             } else {
                 feedbackPanel.className = 'error';
                 nextBtn.className = "next-btn";
